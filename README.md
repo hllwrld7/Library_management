@@ -1,6 +1,6 @@
 # Library_management
 
-A library management system project for my OOP class.
+A library management system project for my OOP class. The UI is made with the help of Template Studio for WPF extension.
 
 Design and implement an object-oriented library management system. The basic assumptions are given below:
 
