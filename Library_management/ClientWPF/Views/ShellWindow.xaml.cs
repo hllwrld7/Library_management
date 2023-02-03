@@ -19,7 +19,6 @@ namespace ClientWPF.Views;
 
 public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow
 {
-    private readonly IRightPaneService _rightPaneService;
     private readonly INavigationService _navigationService;
     private readonly ILibraryManagementService _libraryManagementService;
     private IWindowManagerService _windowManager;
@@ -36,9 +35,8 @@ public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow
 
     public static readonly DependencyProperty TitleBarProperty = TitleBarPropertyKey.DependencyProperty;
 
-    public ShellWindow(IServiceProvider serviceProvider, IRightPaneService rightPaneService, IWindowManagerService windowManager)
+    public ShellWindow(IServiceProvider serviceProvider, IWindowManagerService windowManager)
     {
-        _rightPaneService = rightPaneService;
         InitializeComponent();
         navigationBehavior.Initialize(serviceProvider);
         _navigationService = (INavigationService)serviceProvider.GetService(typeof(INavigationService));

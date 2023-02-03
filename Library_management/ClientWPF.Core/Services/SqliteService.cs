@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace ClientWPF.Core.Services;
 
-public class SqliteService : ISqliteService
+public class SqliteService
 {
     SQLiteConnection _dbConnection;
     
@@ -98,16 +98,6 @@ public class SqliteService : ISqliteService
     public void Dispose()
     {
         _dbConnection.Close();
-    }
-
-    List<IBook> ISqliteService.ReadFromDbQuery()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void DeleteFromDb(IBook book)
-    {
-        throw new NotImplementedException();
     }
 
     public void RecreateTables()

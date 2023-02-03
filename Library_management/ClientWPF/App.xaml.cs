@@ -50,19 +50,11 @@ public partial class App : Application
         // App Host
         services.AddHostedService<ApplicationHostService>();
 
-        // Activation Handlers
-
-        // Core Services
-        services.AddSingleton<ISqliteService, SqliteService>();
-
         // Services
         services.AddSingleton<IWindowManagerService, WindowManagerService>();
-        services.AddSingleton<IApplicationInfoService, ApplicationInfoService>();
-        services.AddSingleton<ISystemService, SystemService>();
         services.AddSingleton<IPersistAndRestoreService, PersistAndRestoreService>();
         services.AddSingleton<IThemeSelectorService, ThemeSelectorService>();
         services.AddSingleton<ILibraryManagementService, LibraryManagementService>();
-        services.AddSingleton<IRightPaneService, RightPaneService>();
         services.AddSingleton<INavigationService, NavigationService>();
 
         // Views

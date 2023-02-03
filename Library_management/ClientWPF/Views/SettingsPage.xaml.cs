@@ -15,8 +15,6 @@ public partial class SettingsPage : Page, INotifyPropertyChanged, INavigationAwa
 {
     private readonly AppConfig _appConfig;
     private readonly IThemeSelectorService _themeSelectorService;
-    private readonly ISystemService _systemService;
-    private readonly IApplicationInfoService _applicationInfoService;
     private bool _isInitialized;
     private AppTheme _theme;
     private string _versionDescription;
@@ -33,19 +31,17 @@ public partial class SettingsPage : Page, INotifyPropertyChanged, INavigationAwa
         set { Set(ref _versionDescription, value); }
     }
 
-    public SettingsPage(IOptions<AppConfig> appConfig, IThemeSelectorService themeSelectorService, ISystemService systemService, IApplicationInfoService applicationInfoService)
+    public SettingsPage(IOptions<AppConfig> appConfig, IThemeSelectorService themeSelectorService)
     {
         _appConfig = appConfig.Value;
         _themeSelectorService = themeSelectorService;
-        _systemService = systemService;
-        _applicationInfoService = applicationInfoService;
         InitializeComponent();
         DataContext = this;
     }
 
     public void OnNavigatedTo(object parameter)
     {
-        VersionDescription = $"{Properties.Resources.AppDisplayName} - {_applicationInfoService.GetVersion()}";
+        VersionDescription = "1.0.0";
         Theme = _themeSelectorService.GetCurrentTheme();
         _isInitialized = true;
     }
@@ -77,9 +73,6 @@ public partial class SettingsPage : Page, INotifyPropertyChanged, INavigationAwa
             _themeSelectorService.SetTheme(AppTheme.Default);
         }
     }
-
-    private void OnPrivacyStatementClick(object sender, RoutedEventArgs e)
-        => _systemService.OpenInWebBrowser(_appConfig.PrivacyStatement);
 
     public event PropertyChangedEventHandler PropertyChanged;
 

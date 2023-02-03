@@ -88,7 +88,7 @@ namespace ClientWPF.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Settings page placeholder text.  Your app description goes here..
+        ///   Looks up a localized string similar to A library management app made as a final project for an OOP class..
         /// </summary>
         public static string SettingsPageAboutText {
             get {
