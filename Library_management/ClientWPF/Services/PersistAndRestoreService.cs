@@ -11,11 +11,11 @@ namespace ClientWPF.Services;
 
 public class PersistAndRestoreService : IPersistAndRestoreService
 {
-    private readonly ISqliteService _fileService;
+    private readonly ILibraryManagementService _fileService;
     private readonly AppConfig _appConfig;
     private readonly string _localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
 
-    public PersistAndRestoreService(ISqliteService fileService, IOptions<AppConfig> appConfig)
+    public PersistAndRestoreService(ILibraryManagementService fileService, IOptions<AppConfig> appConfig)
     {
         _fileService = fileService;
         _appConfig = appConfig.Value;
@@ -23,19 +23,11 @@ public class PersistAndRestoreService : IPersistAndRestoreService
 
     public void PersistData()
     {
+        _fileService.RewriteDbTables();
     }
 
     public void RestoreData()
     {
-        //var folderPath = Path.Combine(_localAppData, _appConfig.ConfigurationsFolder);
-        //var fileName = _appConfig.AppPropertiesFileName;
-        //var properties = _fileService.Read<IDictionary>(folderPath, fileName);
-        //if (properties != null)
-        //{
-        //    foreach (DictionaryEntry property in properties)
-        //    {
-        //        App.Current.Properties.Add(property.Key, property.Value);
-        //    }
-        //}
+        _fileService.RestoreData();
     }
 }

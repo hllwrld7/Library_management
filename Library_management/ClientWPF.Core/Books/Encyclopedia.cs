@@ -68,5 +68,10 @@ namespace ClientWPF.Core.Books
         {
             return new[] { _title, _author, _type.ToString(), _isBorrowed ? "true" : "false" };
         }
+
+        public override string ToString()
+        {
+            return $"{_title} - {_author} - {_type}";
+        }
     }
 }

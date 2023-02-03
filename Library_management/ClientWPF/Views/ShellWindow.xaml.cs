@@ -17,7 +17,7 @@ using MahApps.Metro.Controls.Dialogs;
 
 namespace ClientWPF.Views;
 
-public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow, INotifyPropertyChanged
+public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow
 {
     private readonly IRightPaneService _rightPaneService;
     private readonly INavigationService _navigationService;
@@ -38,7 +38,6 @@ public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow, INo
 
     public ShellWindow(IServiceProvider serviceProvider, IRightPaneService rightPaneService, IWindowManagerService windowManager)
     {
-        System.Diagnostics.Debugger.Launch();
         _rightPaneService = rightPaneService;
         InitializeComponent();
         navigationBehavior.Initialize(serviceProvider);
@@ -46,6 +45,7 @@ public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow, INo
         _libraryManagementService = (ILibraryManagementService)serviceProvider.GetService(typeof(ILibraryManagementService));
         DataContext = this;
         _windowManager = windowManager;
+        _libraryManagementService.OrderBookNumberChanged += OnOrderBookNumberChanged;
     }
 
     public Frame GetNavigationFrame()
@@ -68,6 +68,7 @@ public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow, INo
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        
         var window = sender as MetroWindow;
         TitleBar = window.FindChild<RibbonTitleBar>("RibbonTitleBar");
         TitleBar.InvalidateArrange();
@@ -76,36 +77,23 @@ public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow, INo
 
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
+        _libraryManagementService.RewriteDbTables();
         _libraryManagementService.DisposeOfSqliteService();
+        _libraryManagementService.OrderBookNumberChanged -= OnOrderBookNumberChanged;
         tabsBehavior.Unsubscribe();
     }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-
-    private void Set<T>(ref T storage, T value, [CallerMemberName]string propertyName = null)
-    {
-        if (Equals(storage, value))
-        {
-            return;
-        }
-
-        storage = value;
-        OnPropertyChanged(propertyName);
-    }
-
-    private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private void Dictionaries_Click(object sender, RoutedEventArgs e)
     {
         var dataGridPage = new DataGridPage(_libraryManagementService);
         
         _navigationService.NavigateTo(dataGridPage.GetType(), BookCategory.Dictionary);
-        dataGridPage.BookChosen += OnBookChosen;
     }
 
-    private void OnBookChosen(object sender, EventArgs e)
+    private void OnOrderBookNumberChanged(object sender, int e)
     {
-        btCheckout.Content = $"{_chosenBooksCount + 1} books chosen";
+        _chosenBooksCount = e;
+        btCheckout.Content = $"{_chosenBooksCount} books chosen";
     }
 
     private void Encyclopedias_Click(object sender, RoutedEventArgs e)
@@ -125,12 +113,13 @@ public partial class ShellWindow : MetroWindow, IShellWindow, IRibbonWindow, INo
 
     private void BorrowBook_Click(object sender, RoutedEventArgs e)
     {
-         
-
+        _navigationService.NavigateTo(typeof(ShellDialogWindow));
     }
 
     private void FillLibrary_Click(object sender, RoutedEventArgs e)
     {
         _libraryManagementService.FillLibrary();
+        
+
     }
 }

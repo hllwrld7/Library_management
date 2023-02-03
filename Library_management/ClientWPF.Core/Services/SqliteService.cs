@@ -20,13 +20,13 @@ public class SqliteService : ISqliteService
         if (_dbConnection == null)
             SQLiteConnection.CreateFile("LibraryDb.sqlite");
         _dbConnection.Open();
-        ExecuteDbQuery("CreateDbsIfNotExist", null, BookCategory.None);
+        ExecuteDbQuery("CreateDbsIfNotExist");
     }
 
     public void WriteToDb(Catalogue catalogue, BookCategory category)
     {
         foreach(IBook book in catalogue)
-            ExecuteDbQuery("WriteToDb", book.ToStringArray(), category );
+            ExecuteDbQuery("WriteToDb", category, book.ToStringArray());
     }
 
     public Catalogue ReadFromDbQuery(BookCategory category)
@@ -40,7 +40,8 @@ public class SqliteService : ISqliteService
         var data = new Catalogue();
         while (reader.Read())
         {
-            var isBorrowed = reader[3].ToString() == "true" ? true : false;
+            var r = reader[3].ToString();
+            var isBorrowed = r == "True" ? true : false;
             data.Add(ConvertToBook(category, reader[0].ToString(), reader[1].ToString(), reader[2].ToString(), isBorrowed));
         }
             
@@ -76,7 +77,7 @@ public class SqliteService : ISqliteService
         //ExecuteDbQuery("DeleteFromDb", new string[4] { book.Id.ToString(), book.Title, book.DueDate, book.Category.ToString() });
     }
 
-    private void ExecuteDbQuery(string queryType, string[] args, BookCategory category)
+    private void ExecuteDbQuery(string queryType, BookCategory category = BookCategory.None, string[] args = null)
     {
         string query = String.Empty;
         if (queryType == "CreateDbsIfNotExist")
@@ -88,6 +89,8 @@ public class SqliteService : ISqliteService
             query = $"INSERT INTO {GetBookCategoryString(category)} (title, author, category, borrowed) values ('{args[0]}', '{args[1]}', '{args[2]}', {args[3]});";
         else if (queryType == "DeleteFromDb")
             query = $"DELETE FROM catalogue WHERE AND title = '{args[0]}' AND author = '{args[1]}' AND category = '{args[2]}');";
+        else if (queryType == "ClearTables")
+            query = "DROP TABLE dictionaries;" + "DROP TABLE fiction;" + "DROP TABLE encyclopedias;" + "DROP TABLE other;";
         SQLiteCommand command = new SQLiteCommand(query, _dbConnection);
         command.ExecuteNonQuery();
     }
@@ -105,5 +108,11 @@ public class SqliteService : ISqliteService
     public void DeleteFromDb(IBook book)
     {
         throw new NotImplementedException();
+    }
+
+    public void RecreateTables()
+    {
+        ExecuteDbQuery("ClearTables");
+        ExecuteDbQuery("CreateDbsIfNotExist");
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ClientWPF.Core.Books;
 using ClientWPF.Core.Contracts.Interfaces;
 using ClientWPF.Core.Objects;
+using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Runtime.CompilerServices;
 
@@ -106,5 +107,11 @@ public class Catalogue : IList<IBook>, IEnumerable
     IEnumerator<IBook> IEnumerable<IBook>.GetEnumerator()
     {
         return _catalogue.GetEnumerator();
+    }
+
+    public void UpdateIsBorrowed(IBook book, bool value)
+    {
+        var obj = _catalogue.FirstOrDefault(x => x == book);
+        if (obj != null) obj.IsBorrowed = value;
     }
 }

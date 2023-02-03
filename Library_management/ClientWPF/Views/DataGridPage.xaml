@@ -25,15 +25,19 @@
                 ItemsSource="{Binding Source}"
                 Margin="{StaticResource SmallLeftRightMargin}"
                 KeyboardNavigation.TabNavigation="Once"
-                Name ="dgBooks">
+                IsReadOnly="True"
+                Name ="dgBooks"
+                ContextMenuOpening="ContextMenu_ContextMenuOpening">
                 <DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Title}" Header="Title" />
                     <DataGridTextColumn Binding="{Binding Author}" Header="Author" />
                     <DataGridTextColumn Binding="{Binding Category}" Header="Category" />
+                    <DataGridCheckBoxColumn Binding="{Binding IsBorrowed}" Header="IsBorrowed" />
                 </DataGrid.Columns>
-                <DataGrid.ContextMenu>
+                <DataGrid.ContextMenu >
                     <ContextMenu>
-                        <MenuItem Header="Borrow book" Click="MenuItem_Click"></MenuItem>
+                        <MenuItem Header="Borrow book" Click="MenuItem_Click" Name="btBorrowBook" IsEnabled="false"></MenuItem>
+                        <MenuItem Header="Remove from order" Click="MenuItem_Click_1" Name="btRemoveFromOrder" IsEnabled="false"></MenuItem>
                     </ContextMenu>
                 </DataGrid.ContextMenu>
             </DataGrid>

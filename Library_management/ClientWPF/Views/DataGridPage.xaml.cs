@@ -13,6 +13,7 @@ namespace ClientWPF.Views;
 public partial class DataGridPage : Page, INotifyPropertyChanged, INavigationAware
 {
     private readonly ILibraryManagementService _sampleDataService;
+    private BookCategory _category;
 
     public ObservableCollection<IBook> Source { get; } = new ObservableCollection<IBook>();
 
@@ -26,13 +27,13 @@ public partial class DataGridPage : Page, INotifyPropertyChanged, INavigationAwa
     public async void OnNavigatedTo(object parameter)
     {
         Source.Clear();
-        var category = BookCategory.None;
+        _category = BookCategory.None;
         if(parameter != null)
         {
             if(parameter is BookCategory)
-                category = (BookCategory)parameter;               
+                _category = (BookCategory)parameter;               
         }
-        var data = await _sampleDataService.GetGridDataAsync(category);
+        var data = await _sampleDataService.GetGridDataAsync(_category);
         foreach (var item in data)
         {
             Source.Add((IBook)item);
@@ -41,7 +42,6 @@ public partial class DataGridPage : Page, INotifyPropertyChanged, INavigationAwa
 
     public void OnNavigatedFrom()
     {
-        
     }
 
     public event PropertyChangedEventHandler PropertyChanged;
@@ -66,7 +66,35 @@ public partial class DataGridPage : Page, INotifyPropertyChanged, INavigationAwa
     }
     private void MenuItem_Click(object sender, System.Windows.RoutedEventArgs e)
     {
-        _sampleDataService.BorrowBook((IBook)dgBooks.SelectedItem);
-        OnBookChosen(sender, e);
+        _sampleDataService.AddToOrder((IBook)dgBooks.SelectedItem, _category);
+        dgBooks.Items.Refresh();
+    }
+
+    private void ContextMenu_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+    {
+        SetButtonState();
+    }
+
+    private void SetButtonState()
+    {
+        if (dgBooks.SelectedItem != null)
+        {
+            var selectedBook = (IBook)dgBooks.SelectedItem;
+            var order = _sampleDataService.GetCurrentOrder(); 
+            btBorrowBook.IsEnabled = true;
+            btRemoveFromOrder.IsEnabled = false;
+            if (selectedBook != null && selectedBook.IsBorrowed)
+            {
+                btBorrowBook.IsEnabled = false;
+                if (order.Books.Keys.Contains(selectedBook))
+                    btRemoveFromOrder.IsEnabled = true;
+            }
+        }
+    }
+
+    private void MenuItem_Click_1(object sender, System.Windows.RoutedEventArgs e)
+    {
+        _sampleDataService.RemoveFromOrder((IBook)dgBooks.SelectedItem, _category);
+        dgBooks.Items.Refresh();
     }
 }

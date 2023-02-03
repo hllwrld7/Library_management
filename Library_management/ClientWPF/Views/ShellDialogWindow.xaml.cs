@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ClientWPF.Views;
 
-public partial class ShellDialogWindow : Page, INotifyPropertyChanged, INavigationAware
+public partial class ShellDialogWindow : Page, INavigationAware
 {
     ILibraryManagementService _libraryManagementService;
     public ShellDialogWindow(ILibraryManagementService sampleDataService)
@@ -19,8 +19,6 @@ public partial class ShellDialogWindow : Page, INotifyPropertyChanged, INavigati
         _libraryManagementService = sampleDataService;
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-
     public void OnNavigatedFrom()
     {
         
@@ -28,12 +26,12 @@ public partial class ShellDialogWindow : Page, INotifyPropertyChanged, INavigati
 
     public void OnNavigatedTo(object parameter)
     {
-        
+        tbReceipt.Text = _libraryManagementService.GetCurrentOrder().ToString();
     }
 
-    private void AddBookClick(object sender, RoutedEventArgs e)
+    private void CheckOutClick(object sender, RoutedEventArgs e)
     {
-        var title = tbTitle.Text;
-        _libraryManagementService.AddBook(title, "2022-2-22", "Drama");
+        _libraryManagementService.FinishOrder();
+        tbReceipt.Text = $"The books are borrowed! \n The receipts are stored in {AppDomain.CurrentDomain.BaseDirectory}.";
     }
 }

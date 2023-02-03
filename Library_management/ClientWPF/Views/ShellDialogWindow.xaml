@@ -13,29 +13,14 @@
             <RowDefinition Height="48" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock
-            Style="{StaticResource PageTitleStyle}"
-            Margin="{StaticResource MediumLeftMargin}"
-            />
-        <Grid Grid.Row="1" Margin="{StaticResource SmallTopMargin}" HorizontalAlignment="Left" VerticalAlignment="Top" >
-            <Label FontSize="20">Title</Label>
-            <TextBox Name="tbTitle" Height="60" Width="500"/>
-        </Grid>
-        <Grid Grid.Row="1" Margin="{StaticResource SmallLeftRightMargin}" HorizontalAlignment="Left" VerticalAlignment="Center">
-            <ComboBox Name="cbCategory" Height="60" Width="500"/>
-            <Label FontSize="20">Category</Label>
-        </Grid>
-        <Grid Grid.Row="1" Margin="{StaticResource SmallLeftRightMargin}" HorizontalAlignment="Left" VerticalAlignment="Bottom">
-            <Label FontSize="20">Due date</Label>
-            <Calendar Name="cDueDate" Height="250"/>
-        </Grid>
-        <Grid Grid.Row="1" Margin="{StaticResource SmallLeftRightMargin}" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+        <Grid Margin="0,0,0,10" Grid.RowSpan="2">
+            <TextBlock Name="tbReceipt" TextAlignment="Center" Margin="0,70,0,0">erger</TextBlock>
             <Button
-                Content="Add"
-                HorizontalAlignment="Right"
-                Click="AddBookClick"
-                Width="200"
-                RenderTransformOrigin="0.5,0.5" Margin="0,102,0,0" >
+                Content="CheckOut"
+                HorizontalAlignment="Center"
+                Click="CheckOutClick"
+                Width="302"
+                RenderTransformOrigin="0.5,0.5" VerticalAlignment="Top" Height="102" Margin="0,535,0,0" Panel.ZIndex="1" >
                 <Button.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform ScaleY="1"/>

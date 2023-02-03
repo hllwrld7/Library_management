@@ -91,7 +91,7 @@
                     <Fluent:RibbonGroupBox
                         State="Middle"
                         MinWidth="150"
-                        Header="Fill library (FOR TESTING)">
+                        Header="Refill library (FOR TESTING)">
                         <Button Margin="0,0,0,-92" Click="FillLibrary_Click" Width="143"></Button>
                     </Fluent:RibbonGroupBox>
                 </Fluent:RibbonTabItem>

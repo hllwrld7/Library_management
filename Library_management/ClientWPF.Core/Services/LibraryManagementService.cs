@@ -2,6 +2,7 @@
 using ClientWPF.Core.Contracts.Interfaces;
 using ClientWPF.Core.Contracts.Services;
 using ClientWPF.Core.Models;
+using ClientWPF.Core.Objects;
 
 namespace ClientWPF.Core.Services;
 
@@ -13,29 +14,41 @@ public class LibraryManagementService : ILibraryManagementService
     Catalogue _fiction = new Catalogue();
     Catalogue _otherBooks = new Catalogue();
 
+    Order _currentOrder;
+
     public LibraryManagementService()
     {
-
         _sqliteService = new SqliteService();
-        FillLibrary();
-        _sqliteService.WriteToDb(_dictionaries, BookCategory.Dictionary);
-        _sqliteService.WriteToDb(_encyclopedias, BookCategory.Encyclopedia);
-        _sqliteService.WriteToDb(_fiction, BookCategory.Fiction);
-        _sqliteService.WriteToDb(_otherBooks, BookCategory.None);
-        _dictionaries = _sqliteService.ReadFromDbQuery(BookCategory.Dictionary);
-        _encyclopedias = _sqliteService.ReadFromDbQuery(BookCategory.Encyclopedia);
-        _fiction = _sqliteService.ReadFromDbQuery(BookCategory.Fiction);
-        _otherBooks = _sqliteService.ReadFromDbQuery(BookCategory.None);
+
     }
 
-    public void AddBook(string title, string dueDate, string category)
+    public event EventHandler<int> OrderBookNumberChanged;
+
+
+    private void OnOrderChanged(int e)
     {
+        OrderBookNumberChanged?.Invoke(this, e);
+    }
+
+    public void AddToOrder(IBook book, BookCategory category)
+    {
+        if(_currentOrder == null)
+            _currentOrder= new Order();
         
+        _currentOrder.AddBook(book, category);
+        UpdateCategoryCatalogue(book, category, true);
+        OnOrderChanged(_currentOrder.Books.Count);
     }
 
-    public void BorrowBook(IBook book)
+    private void UpdateCategoryCatalogue(IBook book, BookCategory category, bool isBorrowed)
     {
-        book.IsBorrowed = true;
+        switch (category)
+        {
+            case (BookCategory.Dictionary): _dictionaries.UpdateIsBorrowed(book, isBorrowed); break;
+            case (BookCategory.Encyclopedia): _encyclopedias.UpdateIsBorrowed(book, isBorrowed); break;
+            case (BookCategory.Fiction): _fiction.UpdateIsBorrowed(book, isBorrowed); break;
+            case(BookCategory.None): _otherBooks.UpdateIsBorrowed(book, isBorrowed); break;
+        }
     }
 
     public void DisposeOfSqliteService()
@@ -45,18 +58,48 @@ public class LibraryManagementService : ILibraryManagementService
 
     public void FillLibrary()
     {
-        _dictionaries.Add(new Dictionary("Book 1", "Author 1", DictType.Grammar, false));
-        _encyclopedias.Add(new Encyclopedia("Book 2", "Author 2", EncyclopediaType.Natural_Sciences, false));
-        _fiction.Add(new Fiction("Book 3", "Author 3", FictionType.Drama, false));
-        _otherBooks.Add(new Other("Book 4", "Author 4", false));
+        EmptyCatalogues();
+        _dictionaries.Add(new Dictionary("English Grammar", "Raymond Murray", DictType.Grammar, false));
+        _dictionaries.Add(new Dictionary("Polish-English dictionary", " Joanna Michalak-Gray", DictType.Translation, false));
+        _dictionaries.Add(new Dictionary("Polish dictionary", " Joanna Michalak-Gray", DictType.Definitions, false));
+
+        _encyclopedias.Add(new Encyclopedia("C# for dummies", "Andrew Stellman", EncyclopediaType.Computer_Science, false));
+        _encyclopedias.Add(new Encyclopedia("Biology encyclopedia", "Don Rittner", EncyclopediaType.Natural_Sciences, false));
+        
+        _fiction.Add(new Fiction("A question of guilt", "Jorn Lien Hostmann", FictionType.Drama, false));
+        _fiction.Add(new Fiction("It ends with us", "Colleen Hoover", FictionType.Drama, false));
+        _fiction.Add(new Fiction("Polish fairy tales", "Various", FictionType.FairyTale, false));
+
+        _otherBooks.Add(new Other("Jojos Bizzare Adventure", "Hirohiko Araki", false));
+    }
+
+    private void EmptyCatalogues()
+    {
+        _dictionaries.Clear();
+        _encyclopedias.Clear();
+        _fiction.Clear();
+        _otherBooks.Clear();
+    }
+
+    public Order GetCurrentOrder()
+    {
+        if(_currentOrder==null)
+            _currentOrder= new Order();
+        return _currentOrder;
     }
 
     public async Task<Catalogue> GetGridDataAsync(BookCategory category)
     {
         await Task.CompletedTask;
-        var catalogue = GetCategoryCatalogue(category).ToList();
-        var availableBooks = catalogue.Where(v => !v.IsBorrowed);
-        return new Catalogue(availableBooks.ToList());
+        return GetCategoryCatalogue(category);
+    }
+
+    public void RemoveFromOrder(IBook book, BookCategory category)
+    {
+        if(_currentOrder == null) return;
+        _currentOrder.RemoveBook(book);
+        UpdateCategoryCatalogue(book, category, false);
+        OnOrderChanged(_currentOrder.Books.Count);
     }
 
     private Catalogue GetCategoryCatalogue(BookCategory category)
@@ -68,5 +111,36 @@ public class LibraryManagementService : ILibraryManagementService
             case(BookCategory.Fiction): return _fiction;
             default: return _otherBooks;
         }
+    }
+
+    public void FinishOrder()
+    {
+        if(_currentOrder != null)
+            foreach(var book in _currentOrder.Books.Keys) 
+                Receipt.CreateReceipt(book, _currentOrder.DueDate);
+        _currentOrder = null;
+        OnOrderChanged(0);
+    }
+
+    public void RewriteDbTables()
+    {
+        if(_currentOrder != null)
+        {
+            foreach(var book in _currentOrder.Books.Keys)
+                RemoveFromOrder(book, _currentOrder.Books[book]);
+        }
+        _sqliteService.RecreateTables();
+        _sqliteService.WriteToDb(_dictionaries, BookCategory.Dictionary);
+        _sqliteService.WriteToDb(_encyclopedias, BookCategory.Encyclopedia);
+        _sqliteService.WriteToDb(_fiction, BookCategory.Fiction);
+        _sqliteService.WriteToDb(_otherBooks, BookCategory.None);
+    }
+
+    public void RestoreData()
+    {
+        _dictionaries = _sqliteService.ReadFromDbQuery(BookCategory.Dictionary);
+        _encyclopedias = _sqliteService.ReadFromDbQuery(BookCategory.Encyclopedia);
+        _fiction = _sqliteService.ReadFromDbQuery(BookCategory.Fiction);
+        _otherBooks = _sqliteService.ReadFromDbQuery(BookCategory.None);
     }
 }

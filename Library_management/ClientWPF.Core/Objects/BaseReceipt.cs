@@ -4,7 +4,8 @@ using System.Text;
 
 namespace ClientWPF.Core.Objects
 {
-    internal class Invoice: Order
+    public class BaseReceipt
     {
+        public DateTime DueDate { get => DateTime.Now.AddMonths(1) ; }
     }
 }
